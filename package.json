@@ -1,5 +1,5 @@
 {
-  "homepage": "https://krishnapant13.github.io/E-shop",
+  "homepage": "https://krishnapant13.github.io/OEBE",
   "name": "e-shop",
   "version": "1.0.0",
   "description": "",
@@ -14,12 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/krishnapant13/E-shop.git"
+    "url": "git+https://github.com/krishnapant13/OEBE.git"
   },
   "author": "krishna",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/krishnapant13/E-shop/issues"
+    "url": "https://github.com/krishnapant13/OEBE/issues"
   },
   "dependencies": {
     "@stripe/stripe-js": "^2.0.0",
@@ -35,7 +35,10 @@
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.9.3",
     "nodemon": "^2.0.22",
+    "socket.io": "^4.7.2",
     "stripe": "^12.18.0"
   },
-  "devDependencies": {}
+  "devDependencies": {
+    "react-scripts": "^4.0.3"
+  }
 }

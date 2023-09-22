@@ -1,6 +1,5 @@
 const app = require("./app");
 const connectDatabase = require("./db/database");
-const socketIO = require('socket.io');
 
 // Handling uncought exception
 process.on("uncaughtException", (err) => {
