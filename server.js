@@ -14,7 +14,26 @@ if (process.env.NODE_ENV !== "PRODUCTION") {
 }
 
 //connect db
-connectDatabase();
+connectDatabase()
+  .then(() => {
+    // Start the server after the database connection is established
+    const server = app.listen(process.env.PORT, () => {
+      console.log(`Server is running on http://localhost:${process.env.PORT}`);
+    });
+
+    // Handling unhandled promise rejections
+    process.on("unhandledRejection", (err) => {
+      console.error(`Unhandled Rejection: ${err.message}`);
+      console.error("Shutting down the server...");
+      server.close(() => {
+        process.exit(1);
+      });
+    });
+  })
+  .catch((error) => {
+    console.error("Error connecting to MongoDB:", error);
+    process.exit(1);
+  });
 
 //creating a server
 const server = app.listen(process.env.PORT, () => {

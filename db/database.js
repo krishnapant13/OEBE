@@ -7,6 +7,10 @@ const connectDatabase = () => {
     })
     .then((data) => {
       console.log(`mongod connected with server: ${data.connection.host}`);
+    })
+    .catch((error) => {
+      console.error("Error connecting to MongoDB:", error);
+      throw error;
     });
 };
 
