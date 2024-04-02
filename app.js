@@ -5,7 +5,9 @@ const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const PORT = process.env.PORT || 8000;
+const morgan = require("morgan");
 
+app.use(morgan("dev"));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/", express.static("uploads"));
