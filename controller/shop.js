@@ -20,7 +20,7 @@ const createActivationToken = (seller) => {
 // create seller
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
   try {
-    const { email } = req.body;
+    console.log("req body", req.body);
     const sellerEmail = await Shop.findOne({ email });
 
     if (sellerEmail) {

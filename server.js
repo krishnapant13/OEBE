@@ -6,11 +6,10 @@ process.on("uncaughtException", (err) => {
   console.log(`Error: ${err.message}`);
   console.log("Sutting down the server for handling uncought exception");
 });
-
 //config
 if (process.env.NODE_ENV !== "PRODUCTION") {
   require("dotenv").config({
-    path: "./config/.env",
+    path: "./.env",
   });
 }
 

@@ -16,7 +16,6 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
     const userEmail = await User.findOne({ email });
-
     if (userEmail) {
       const filename = req.file.filename;
       const filePath = `uploads/${filename}`;
