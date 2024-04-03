@@ -20,9 +20,8 @@ const createActivationToken = (seller) => {
 // create seller
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
   try {
-    console.log("req body", req.body);
+    const email = req.body.email;
     const sellerEmail = await Shop.findOne({ email });
-
     if (sellerEmail) {
       const filename = req.file.filename;
       const filePath = `uploads/${filename}`;
