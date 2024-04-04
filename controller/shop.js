@@ -20,6 +20,10 @@ const createActivationToken = (seller) => {
 // create seller
 router.post("/create-shop", upload.single("file"), async (req, res, next) => {
   try {
+    const shopCount = await Shop.countDocuments();
+    if (shopCount >= 10) {
+      return next(new ErrorHandler("Shop Creation limit exceeded", 400));
+    }
     const email = req.body.email;
     const sellerEmail = await Shop.findOne({ email });
     if (sellerEmail) {

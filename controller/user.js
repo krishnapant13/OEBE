@@ -14,6 +14,10 @@ const { isAuthenticated, isAdmin } = require("../middleware/auth");
 // create user
 router.post("/create-user", upload.single("file"), async (req, res, next) => {
   try {
+    const userCount = await User.countDocuments();
+    if (userCount >= 10) {
+      return next(new ErrorHandler("User creation limit exceeded", 400));
+    }
     const { name, email, password } = req.body;
     const userEmail = await User.findOne({ email });
     if (userEmail) {
@@ -44,7 +48,7 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
     try {
       await sendMail({
         email: user.email,
-        subject: "Activate your account",
+        subject: "TheOEStore - Activate your account",
         message: `Hello ${user.name}, please click on the link to activate your account: ${activationUrl}`,
       });
       res.status(201).json({
