@@ -14,14 +14,14 @@ app.use("/", express.static("uploads"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://krishnapant13.github.io/OEFE"],
+    origin: ["http://localhost:3000", "https://krishnapant13.github.io/"],
     credentials: true,
   })
 );
 //config
 if (process.env.NODE_ENV !== "PRODUCTION") {
   require("dotenv").config({
-    path: "./config/.env",
+    path: "./.env",
   });
 }
 // import routes
