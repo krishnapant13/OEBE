@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const Shop = require("../model/shop");
 const router = express.Router();
-const { upload } = require("../multer");
+const multer = require("multer");
 const ErrorHandler = require("../utills/ErrorHandler");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utills/sendMail");
@@ -10,6 +10,8 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const fs = require("fs");
 const sendShopToken = require("../utills/shopToken");
 const { isSeller, isAuthenticated, isAdmin } = require("../middleware/auth");
+const uploadToCloudinary = require("../utills/cloudinaryUploads");
+const upload = multer().single("file");
 
 //creating activation token
 const createActivationToken = (seller) => {
@@ -18,7 +20,7 @@ const createActivationToken = (seller) => {
   });
 };
 // create seller
-router.post("/create-shop", upload.single("file"), async (req, res, next) => {
+router.post("/create-shop", upload, async (req, res, next) => {
   try {
     const shopCount = await Shop.countDocuments();
     if (shopCount >= 10) {
@@ -27,20 +29,12 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
     const email = req.body.email;
     const sellerEmail = await Shop.findOne({ email });
     if (sellerEmail) {
-      const filename = req.file.filename;
-      const filePath = `uploads/${filename}`;
-      if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.log("File not found", err);
-            res.status(500).json({ message: "Error deleting file" });
-          }
-        });
-      }
       return next(new ErrorHandler("Seller already exists", 400));
     }
-    const filename = req.file.filename;
-    const fileUrl = path.join(filename);
+    if (!req.file) {
+      return next(new ErrorHandler("No file uploaded", 400));
+    }
+    const imageUrl = await uploadToCloudinary(req.file.buffer);
     const seller = {
       name: req.body.name,
       email: email,
@@ -48,7 +42,7 @@ router.post("/create-shop", upload.single("file"), async (req, res, next) => {
       address: req.body.address,
       zipCode: req.body.zipCode,
       phoneNumber: req.body.phoneNumber,
-      avatar: fileUrl,
+      avatar: imageUrl,
     };
     const activation_token = createActivationToken(seller);
 
@@ -197,15 +191,15 @@ router.get(
 router.put(
   "/update-shop-avatar",
   isSeller,
-  upload.single("image"),
+  upload,
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const existSeller = await Shop.findById(req.seller._id);
-      const existAvatarPath = `uploads/${existSeller.avatar}`;
-      fs.unlinkSync(existAvatarPath);
-      const fileUrl = path.join(req.file.filename);
+      if (!req.file) {
+        return next(new ErrorHandler("No file uploaded", 400));
+      }
+      const imageUrl = await uploadToCloudinary(req.file.buffer);
       const seller = await Shop.findByIdAndUpdate(req.seller._id, {
-        avatar: fileUrl,
+        avatar: imageUrl,
       });
       res.status(200).json({
         success: true,

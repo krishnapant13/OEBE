@@ -2,7 +2,7 @@ const express = require("express");
 const path = require("path");
 const User = require("../model/user");
 const router = express.Router();
-const { upload } = require("../multer");
+const multer = require("multer");
 const ErrorHandler = require("../utills/ErrorHandler");
 const jwt = require("jsonwebtoken");
 const sendMail = require("../utills/sendMail");
@@ -10,9 +10,11 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const sendToken = require("../utills/jwtToken");
 const fs = require("fs");
 const { isAuthenticated, isAdmin } = require("../middleware/auth");
+const uploadToCloudinary = require("../utills/cloudinaryUploads");
+const upload = multer().single("file");
 
 // create user
-router.post("/create-user", upload.single("file"), async (req, res, next) => {
+router.post("/create-user", upload, async (req, res, next) => {
   try {
     const userCount = await User.countDocuments();
     if (userCount >= 10) {
@@ -21,30 +23,19 @@ router.post("/create-user", upload.single("file"), async (req, res, next) => {
     const { name, email, password } = req.body;
     const userEmail = await User.findOne({ email });
     if (userEmail) {
-      const filename = req.file.filename;
-      const filePath = `uploads/${filename}`;
-      if (fs.existsSync(filePath)) {
-        fs.unlink(filePath, (err) => {
-          if (err) {
-            console.log("File not found", err);
-            res.status(500).json({ message: "Error deleting file" });
-          }
-        });
-      }
       return next(new ErrorHandler("User already exists", 400));
     }
-    const filename = req.file.filename;
-    const fileUrl = path.join(filename);
-
+    if (!req.file) {
+      return next(new ErrorHandler("No file uploaded", 400));
+    }
+    const imageUrl = await uploadToCloudinary(req.file.buffer);
     const user = {
       name: name,
       email: email,
       password: password,
-      avatar: fileUrl,
+      avatar: imageUrl,
     };
-
     const activationToken = createActivationToken(user);
-
     const activationUrl = `${process.env.APP_URL}/activation/${activationToken}`;
 
     try {
@@ -112,7 +103,6 @@ router.post(
   "/login-user",
   catchAsyncErrors(async (req, res, next) => {
     try {
-      console.log("hi");
       const { email, password } = req.body;
       if (!email || !password) {
         return next(new ErrorHandler("Please provide the all fields!", 400));
@@ -209,16 +199,16 @@ router.put(
 router.put(
   "/update-avatar",
   isAuthenticated,
-  upload.single("image"),
+  upload,
   catchAsyncErrors(async (req, res, next) => {
     try {
-      const existUser = await User.findById(req.user.id);
-      const existAvatarPath = `uploads/${existUser.avatar}`;
-      fs.unlinkSync(existAvatarPath);
-      const fileUrl = path.join(req.file.filename);
+      const imageUrl = await uploadToCloudinary(req.file.buffer);
       const user = await User.findByIdAndUpdate(req.user.id, {
-        avatar: fileUrl,
+        avatar: imageUrl,
       });
+      if (!req.file) {
+        return next(new ErrorHandler("No file uploaded", 400));
+      }
       res.status(200).json({
         success: true,
         user,
