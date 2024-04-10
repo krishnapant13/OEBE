@@ -14,7 +14,7 @@ app.use("/", express.static("uploads"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://krishnapant13.github.io"],
+    origin: ["http://localhost:3000", "https://krishnapant13.github.io/OEFE"],
     credentials: true,
   })
 );
