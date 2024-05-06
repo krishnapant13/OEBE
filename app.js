@@ -18,6 +18,7 @@ app.use(
     credentials: true,
   })
 );
+//comment this for local
 app.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "https://krishnapant13.github.io");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
@@ -49,6 +50,8 @@ const payment = require("./controller/payment");
 const order = require("./controller/order");
 const conversation = require("./controller/conversation");
 const messages = require("./controller/messages");
+const guest = require("./controller/guest");
+const room = require("./controller/room");
 
 app.use("/api/v2/user", user);
 app.use("/api/v2/shop", shop);
@@ -59,6 +62,8 @@ app.use("/api/v2/payment", payment);
 app.use("/api/v2/order", order);
 app.use("/api/v2/message", messages);
 app.use("/api/v2/conversation", conversation);
+app.use("/api/v2/guest", guest);
+app.use("/api/v2/room", room);
 
 //error handling
 app.use(ErrorHandler);
