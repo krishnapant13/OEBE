@@ -1,24 +1,71 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const guestSchema = new mongoose.Schema({
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  emailAddress: { type: String, required: true },
-  phoneNumber: { type: String, required: true },
-  address: { type: String, required: true },
-  state: { type: String, required: true },
-  country: { type: String, required: true },
-  zipCode: { type: String, required: true },
-  additionMessage: { type: String },
+  firstName: {
+    type: String,
+    required: true,
+  },
+  lastName: {
+    type: String,
+    required: true,
+  },
+  emailAddress: {
+    type: String,
+    required: true,
+    unique: true,
+  },
+  phoneNumber: {
+    type: String,
+    required: true,
+  },
+  address: {
+    type: String,
+    required: true,
+  },
+  state: {
+    type: String,
+    required: true,
+  },
+  country: {
+    type: String,
+    required: true,
+  },
+  zipCode: {
+    type: String,
+    required: true,
+  },
+  password: {
+    type: String,
+    required: true,
+    select: false,
+  },
+  verified: {
+    type: Boolean,
+    default: false,
+  },
   avatar: {
     type: String,
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now(),
+    required: true,
   },
 });
 
-const Guest = mongoose.model("Guest", guestSchema);
+guestSchema.pre("save", async function (next) {
+  if (!this.isModified("password")) {
+    next();
+  }
+  this.password = await bcrypt.hash(this.password, 10);
+});
 
-module.exports = Guest;
+guestSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
+guestSchema.methods.getJwtToken = function () {
+  return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
+    expiresIn: process.env.JWT_EXPIRES,
+  });
+};
+
+module.exports = mongoose.model("Guest", guestSchema);
